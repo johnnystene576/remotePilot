@@ -1,34 +1,38 @@
 #import serial
 import cv2, time
 import numpy as np
-from PIL import Image, ImageTk
 from tkinter import *
+import PIL.Image, PIL.ImageTk
 
-global infoBox
+global infoBox, imageBox
 root = Tk()
 
 def pilotLoop(videoCapture):
-    global infoBox
-    while True:
-        s, img = videoCapture.read()
+    global infoBox, imageBox
+    s, img = videoCapture.read()
+    if s:
+        showimg = cv2.resize(img, (400, 300))
         s, img = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
-        if s:
-            print("S", s, "IMG", img)
-            img = cv2.resize(img, (80, 60))
-        else:
-            infoBox.insert(END, "Error resizing image: Assertion failed.\n")
-            
+        img = cv2.resize(img, (80, 60))
+    else:
+        print("Error resizing images - assertion failed. Webcam probably not connected.")
+    showImage = cv2.cvtColor(showimg, cv2.COLOR_BGR2RGB)
+    showImage = PIL.Image.fromarray(showImage)
+    root.showImage = showImage = PIL.ImageTk.PhotoImage(showImage)
+    imageBox.create_image(0, 0, image=showImage, anchor=NW)
+
 def initPilot():
     startDrivingButton.config(state = DISABLED)
-    infoBox.insert(END, "Connecting to camera and setting up video stream...")
+    print("Connecting to camera and starting video stream...")
     cam = cv2.VideoCapture(0)
-    infoBox.insert(END, " Done.\n")
-    pilotLoop(cam)
+    print("Done!")
+    while True:
+        pilotLoop(cam)
+        root.update()
 
 #Setup GUI
+imageBox = Canvas(root, width=400, height=300)
+imageBox.pack()
 startDrivingButton = Button(root, text = "Start driving!", command = initPilot)
 startDrivingButton.pack()
-infoBox = Text(root)
-infoBox.pack()
-
 mainloop()
