@@ -43,7 +43,6 @@ def pilotLoop(videoCapture):
         with open('data.json', 'w') as jsonfile:
             json.dump(data, jsonfile)
         
-
 def initPilot():
     startDrivingButton.config(state = DISABLED) #Disable button
     print("Starting video stream...")
